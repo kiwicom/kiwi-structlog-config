@@ -1,0 +1,6 @@
+pylint
+coverage
+pytest
+pytest-cov
+pytest-freezegun
+pytest-mock
