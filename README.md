@@ -9,7 +9,7 @@ pip install kiwi-structlog-config
 In your `__init__.py` add
 
 ```python
-from kw.structlog_config.config import configure_stdlib_logging, configure_structlog
+from kw.structlog_config import configure_stdlib_logging, configure_structlog
 
 
 configure_structlog(debug=True)
