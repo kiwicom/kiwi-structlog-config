@@ -8,7 +8,7 @@ with open('test-requirements.in') as f:
 
 setup(
     name='kiwi-structlog-config',
-    version='0.1.0',
+    version='0.1.1',
     url='https://github.com/kiwicom/kiwi-structlog-config',
     author='Platform Team',
     author_email='platform@kiwi.com',
