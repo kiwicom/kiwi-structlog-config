@@ -1,12 +1,18 @@
+from decimal import Decimal
+
 import pytest
 
 from kw.structlog_config import processors as uut
 
 
-def test_float_rounder():
-    event_dict = {'float': float(1.1119), }
-    result = uut.float_rounder(None, None, event_dict)
-    assert str(result['float']) == '1.112'
+@pytest.mark.parametrize("value, expected", (
+    (1.1119, "1.112"),
+    (Decimal("1.1119"), "1.112"),
+))
+def test_numeric_rounder(value, expected):
+    event_dict = {"value": value}
+    result = uut.numeric_rounder(None, None, event_dict)
+    assert str(result["value"]) == expected
 
 
 @pytest.mark.freeze_time('2018-01-01')

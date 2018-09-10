@@ -1,15 +1,16 @@
 """Contains ``structlog`` event processors."""
 from __future__ import absolute_import, print_function
 
+from decimal import Decimal
 from time import time
 
 import structlog
 
 
-def float_rounder(_, __, event_dict):
+def numeric_rounder(_, __, event_dict):
     """Round any floats in ``event_dict`` to 3 decimal places."""
-    for key, value in list(event_dict.items()):
-        if isinstance(value, float):
+    for key, value in event_dict.items():
+        if isinstance(value, (float, Decimal)):
             event_dict[key] = round(value, 3)
     return event_dict
 

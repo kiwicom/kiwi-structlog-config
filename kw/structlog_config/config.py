@@ -7,7 +7,9 @@ import logging.config
 import simplejson
 import structlog
 
-from .processors import add_structlog_context, drop_debug_logs, float_rounder, process_stdlib_logging, unix_timestamper
+from .processors import (
+    add_structlog_context, drop_debug_logs, numeric_rounder, process_stdlib_logging, unix_timestamper
+)
 
 # structlog configuration
 PRODUCTION_PROCESSORS = [
@@ -15,16 +17,15 @@ PRODUCTION_PROCESSORS = [
     drop_debug_logs,
     structlog.stdlib.PositionalArgumentsFormatter(),
     unix_timestamper,
-    float_rounder,
+    numeric_rounder,
     structlog.processors.format_exc_info,
     structlog.processors.UnicodeEncoder(),
-    structlog.processors.JSONRenderer(serializer=simplejson.dumps),
 ]
 
 DEBUG_PROCESSORS = [
     structlog.stdlib.add_log_level,
     structlog.stdlib.PositionalArgumentsFormatter(),
-    float_rounder,
+    numeric_rounder,
     structlog.processors.TimeStamper('iso'),
     structlog.processors.ExceptionPrettyPrinter(),
     structlog.processors.UnicodeDecoder(),
@@ -32,10 +33,18 @@ DEBUG_PROCESSORS = [
 ]
 
 
-def configure_structlog(debug=False):
+def configure_structlog(debug=False, json_kwargs=None):
     """Configure proper log processors and settings for structlog with regards to debug setting."""
+    json_kwargs = {} if json_kwargs is None else json_kwargs
 
-    processors = DEBUG_PROCESSORS if debug else PRODUCTION_PROCESSORS
+    if debug:
+        processors = DEBUG_PROCESSORS
+    else:
+        processors = PRODUCTION_PROCESSORS + [
+            structlog.processors.JSONRenderer(
+                serializer=simplejson.dumps, **json_kwargs
+            )
+        ]
 
     structlog.configure_once(
         processors=processors,
