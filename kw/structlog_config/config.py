@@ -33,10 +33,8 @@ DEBUG_PROCESSORS = [
 ]
 
 
-def configure_structlog(debug=False, json_kwargs=None):
-    """Configure proper log processors and settings for structlog with regards to debug setting."""
-    json_kwargs = {} if json_kwargs is None else json_kwargs
-
+def get_structlog_processors(debug=False, json_kwargs=None):
+    """Helper method to get debug/production processors list."""
     if debug:
         processors = DEBUG_PROCESSORS
     else:
@@ -45,7 +43,14 @@ def configure_structlog(debug=False, json_kwargs=None):
                 serializer=simplejson.dumps, **json_kwargs
             )
         ]
+    return processors
 
+
+def configure_structlog(debug=False, json_kwargs=None):
+    """Configure proper log processors and settings for structlog with regards to debug setting."""
+    json_kwargs = {} if json_kwargs is None else json_kwargs
+
+    processors = get_structlog_processors(debug, json_kwargs)
     structlog.configure_once(
         processors=processors,
         logger_factory=structlog.PrintLoggerFactory(),
@@ -54,7 +59,7 @@ def configure_structlog(debug=False, json_kwargs=None):
     )
 
 
-def configure_stdlib_logging(debug=False):
+def configure_stdlib_logging(debug=False, json_kwargs=None):
     """Configure standard logging to log using the same processors as structlog."""
 
     # Specific processors for stdlib logging
@@ -65,7 +70,7 @@ def configure_stdlib_logging(debug=False):
     ]
 
     # Append structlog processors to chain
-    processors = DEBUG_PROCESSORS if debug else PRODUCTION_PROCESSORS
+    processors = get_structlog_processors(debug, json_kwargs)
     stdlib_processors.extend(processors)
 
     # The last processor needs to be passed separately
