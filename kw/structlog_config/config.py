@@ -35,6 +35,8 @@ DEBUG_PROCESSORS = [
 
 def get_structlog_processors(debug=False, json_kwargs=None):
     """Helper method to get debug/production processors list."""
+    json_kwargs = {} if json_kwargs is None else json_kwargs
+
     if debug:
         processors = DEBUG_PROCESSORS
     else:
@@ -48,8 +50,6 @@ def get_structlog_processors(debug=False, json_kwargs=None):
 
 def configure_structlog(debug=False, json_kwargs=None):
     """Configure proper log processors and settings for structlog with regards to debug setting."""
-    json_kwargs = {} if json_kwargs is None else json_kwargs
-
     processors = get_structlog_processors(debug, json_kwargs)
     structlog.configure_once(
         processors=processors,
