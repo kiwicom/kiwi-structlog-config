@@ -4,6 +4,7 @@
 #
 #    pip-compile --no-index --output-file requirements.txt requirements.in
 #
+colorama==0.4.1
 simplejson==3.13.2
 six==1.11.0               # via structlog
 structlog==17.2.0
