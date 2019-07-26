@@ -8,7 +8,8 @@ import simplejson
 import structlog
 
 from .processors import (
-    add_structlog_context, drop_debug_logs, numeric_rounder, process_stdlib_logging, unix_timestamper
+    add_structlog_context, drop_debug_logs, numeric_rounder, process_stdlib_logging, unix_timestamper,
+    datadog_tracer_injection
 )
 
 # structlog configuration
@@ -18,6 +19,7 @@ PRODUCTION_PROCESSORS = [
     structlog.stdlib.PositionalArgumentsFormatter(),
     unix_timestamper,
     numeric_rounder,
+    datadog_tracer_injection,
     structlog.processors.format_exc_info,
     structlog.processors.UnicodeEncoder(),
 ]
@@ -27,6 +29,7 @@ DEBUG_PROCESSORS = [
     structlog.stdlib.PositionalArgumentsFormatter(),
     numeric_rounder,
     structlog.processors.TimeStamper('iso'),
+    datadog_tracer_injection,
     structlog.processors.ExceptionPrettyPrinter(),
     structlog.processors.UnicodeDecoder(),
     structlog.dev.ConsoleRenderer(pad_event=25),
