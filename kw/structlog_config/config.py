@@ -60,7 +60,7 @@ def configure_structlog(debug=False, json_kwargs=None, timestamp_format=None):
     )
 
 
-def configure_stdlib_logging(debug=False, json_kwargs=None, timestamp_format=None):
+def configure_stdlib_logging(debug=False, json_kwargs=None, timestamp_format=None, level=None):
     """Configure standard logging to log using the same processors as structlog."""
 
     # Specific processors for stdlib logging
@@ -69,6 +69,9 @@ def configure_stdlib_logging(debug=False, json_kwargs=None, timestamp_format=Non
         structlog.stdlib.add_logger_name,  # fill `logger` attribute
         process_stdlib_logging  # fill `message` attribute, set `event`
     ]
+
+    if level is None:
+        level = "DEBUG" if debug else "INFO"
 
     # Append structlog processors to chain
     processors = get_structlog_processors(debug, json_kwargs, timestamp_format)
@@ -89,7 +92,7 @@ def configure_stdlib_logging(debug=False, json_kwargs=None, timestamp_format=Non
         },
         "handlers": {
             "default": {
-                "level": "DEBUG" if debug else "INFO",
+                "level": level,
                 "class": "logging.StreamHandler",
                 "formatter": "plain",
                 "stream": "ext://sys.stdout",
@@ -98,7 +101,7 @@ def configure_stdlib_logging(debug=False, json_kwargs=None, timestamp_format=Non
         "loggers": {
             "": {
                 "handlers": ["default"],
-                "level": "DEBUG" if debug else "INFO",
+                "level": level,
                 "propagate": True,
             },
         }
