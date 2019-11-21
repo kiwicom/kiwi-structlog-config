@@ -20,6 +20,11 @@ tests:
     paths:
      - .tox/
 
+pypi_upload:
+  only:
+    changes:
+      - setup.py
+
 pages:
   stage: release
   image: python:3.5-alpine
