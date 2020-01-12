@@ -52,9 +52,9 @@ def datadog_tracer_injection(_, __, event_dict):
         # Do nothing if ddtrace module is not available.
         return event_dict
 
-    # Hack to prevent infinite loop in asyncio event loop creation
+    # Hack to prevent infinite loop in asyncio event loop creation in debug log-level
     # https://github.com/DataDog/dd-trace-py/issues/1003
-    if event_dict.get('logger') == 'asyncio':
+    if event_dict["level"] == "debug" and event_dict.get('logger') == 'asyncio':
         return event_dict
 
     trace_id, span_id = get_correlation_ids()
