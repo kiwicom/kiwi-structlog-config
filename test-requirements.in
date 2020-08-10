@@ -1,6 +1,7 @@
-pylint
 coverage
-pytest
+pytest<5
 pytest-cov
 pytest-freezegun
-pytest-mock
+pytest-mock<3  # Last Python 2 compatible
+freezegun
+more-itertools ; python_version > "3"

@@ -4,6 +4,7 @@ jobs=0
 
 [MESSAGES CONTROL]
 disable =
+  bad-continuation,
   missing-docstring,
   line-too-long,
   invalid-name,
