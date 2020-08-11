@@ -9,10 +9,10 @@ import structlog
 
 from .processors import (
     add_structlog_context,
+    datadog_tracer_injection,
     drop_debug_logs,
     numeric_rounder,
     process_stdlib_logging,
-    datadog_tracer_injection,
 )
 
 # structlog configuration
@@ -38,7 +38,9 @@ DEBUG_PROCESSORS = [
 ]
 
 
-def get_structlog_processors(debug=False, json_kwargs=None, timestamp_format=None):
+def get_structlog_processors(
+    debug=False, json_kwargs=None, timestamp_format=None, extra_processors=None
+):
     """Helper method to get debug/production processors list."""
     json_kwargs = {} if json_kwargs is None else json_kwargs
 
@@ -51,12 +53,20 @@ def get_structlog_processors(debug=False, json_kwargs=None, timestamp_format=Non
                 serializer=simplejson.dumps, **json_kwargs
             ),
         ]
+
+    if extra_processors:
+        processors += extra_processors
+
     return processors
 
 
-def configure_structlog(debug=False, json_kwargs=None, timestamp_format=None):
+def configure_structlog(
+    debug=False, json_kwargs=None, timestamp_format=None, extra_processors=None
+):
     """Configure proper log processors and settings for structlog with regards to debug setting."""
-    processors = get_structlog_processors(debug, json_kwargs, timestamp_format)
+    processors = get_structlog_processors(
+        debug, json_kwargs, timestamp_format, extra_processors
+    )
     structlog.configure_once(
         processors=processors,
         logger_factory=structlog.PrintLoggerFactory(),

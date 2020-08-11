@@ -1,6 +1,7 @@
 """Contains ``structlog`` event processors."""
 from __future__ import absolute_import, print_function
 
+import re
 from decimal import Decimal
 from time import time
 
@@ -62,3 +63,31 @@ def datadog_tracer_injection(_, __, event_dict):
         event_dict["dd.trace_id"] = trace_id
         event_dict["dd.span_id"] = span_id
     return event_dict
+
+
+class Anonymize:
+    r"""Anonymize personal data.
+
+    anonymize = Anonymize(patterns=[
+        ({"visa", "amex"}, r"\d+(\d{4})", "*"*12 + r"\1"),
+        ({"passenger_name"}, r"(\w)\w*", r"\1***"),
+    ])
+    """
+
+    def __init__(self, patterns):
+        self.patterns = self.build_mapping(patterns)
+
+    @classmethod
+    def build_mapping(cls, patterns):
+        """Flatten input in a dict and compile regex patterns."""
+        mapping = dict()
+        for keys, pattern, replacement in patterns:
+            regex = re.compile(pattern)
+            mapping.update({key: (regex, replacement) for key in keys})
+        return mapping
+
+    def __call__(self, logger, method_name, event_dict):
+        for key in set(event_dict) & set(self.patterns):
+            pattern, replacement = self.patterns[key]
+            event_dict[key] = re.sub(pattern, replacement, event_dict[key])
+        return event_dict
