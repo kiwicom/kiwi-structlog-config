@@ -1,6 +1,6 @@
 [Default]
 files = **.(py|md|rst|yml), tox.ini, .coafile
-ignore = (.tox|env|.env|venv)/**, docs/conf.py
+ignore = (.tox|env|.env|.venv|venv)/**, docs/conf.py
 
 indent_size = 4
 use_spaces = True
@@ -28,10 +28,6 @@ files = **.yml, tox.ini, .coafile
 bears = SpaceConsistencyBear
 indent_size = 2
 
-[python-spacing]  # Own section needed, otherwise conflicts occur
-files = **.py
-bears = YapfBear
-
 [python-semantic]
 files = **.py
 bears = RadonBear, PyUnusedCodeBear, CPDBear
@@ -46,7 +42,7 @@ yamllint_config = .yamllint
 files = **.md
 bears = MarkdownBear
 
-[long-lines]  # After YapfBear as it might be able to autofix some of those occurrences
+[long-lines]
 bears = LineLengthBear
 
 [commit]
