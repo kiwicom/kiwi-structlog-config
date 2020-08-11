@@ -22,21 +22,21 @@ def numeric_rounder(_, __, event_dict):
 
 def drop_debug_logs(_, __, event_dict):
     """Drop event with ``debug`` log level."""
-    if event_dict['level'] == 'debug':
+    if event_dict["level"] == "debug":
         raise structlog.DropEvent
     return event_dict
 
 
 def unix_timestamper(_, __, event_dict):
     """Add curent timestamp to event."""
-    event_dict['timestamp'] = time()
+    event_dict["timestamp"] = time()
     return event_dict
 
 
 def process_stdlib_logging(_, __, event_dict):
     """Move standard logging message to ``message`` field and change ``event`` to desired event name."""
-    event_dict['message'] = event_dict['event']
-    event_dict['event'] = 'stdlib_log'
+    event_dict["message"] = event_dict["event"]
+    event_dict["event"] = "stdlib_log"
     return event_dict
 
 
@@ -54,11 +54,11 @@ def datadog_tracer_injection(_, __, event_dict):
 
     # Hack to prevent infinite loop in asyncio event loop creation in debug log-level
     # https://github.com/DataDog/dd-trace-py/issues/1003
-    if event_dict["level"] == "debug" and event_dict.get('logger') == 'asyncio':
+    if event_dict["level"] == "debug" and event_dict.get("logger") == "asyncio":
         return event_dict
 
     trace_id, span_id = get_correlation_ids()
     if trace_id and span_id:
-        event_dict['dd.trace_id'] = trace_id
-        event_dict['dd.span_id'] = span_id
+        event_dict["dd.trace_id"] = trace_id
+        event_dict["dd.span_id"] = span_id
     return event_dict
