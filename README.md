@@ -1,5 +1,9 @@
 # Kiwi Structlog Config
 
+# *DEPRECATED*
+
+This logger has been deprecated in favor of [logtopia](https://gitlab.skypicker.com/autobooking/booking/logtopia)
+
 ## Installation
 
 ```bash
