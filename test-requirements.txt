@@ -4,21 +4,49 @@
 #
 #    pip-compile --output-file=test-requirements.txt test-requirements.in
 #
-atomicwrites==1.4.0       # via pytest
-attrs==19.3.0             # via pytest
-coverage==5.2.1           # via -r test-requirements.in, pytest-cov
-freezegun==0.3.15         # via -r test-requirements.in, pytest-freezegun
-lazy-object-proxy==1.4.3  # via astroid
-more-itertools==8.4.0 ; python_version > "3"  # via -r test-requirements.in, pytest
-packaging==20.4           # via pytest
-pluggy==0.13.1            # via pytest
-py==1.9.0                 # via pytest
-pyparsing==2.4.7          # via packaging
-pytest-cov==2.10.0        # via -r test-requirements.in
-pytest-freezegun==0.4.2   # via -r test-requirements.in
-pytest-mock==2.0.0        # via -r test-requirements.in
-pytest==4.6.11            # via -r test-requirements.in, pytest-cov, pytest-freezegun, pytest-mock
-python-dateutil==2.8.1    # via freezegun
-six==1.15.0               # via astroid, freezegun, packaging, pytest, python-dateutil
-wcwidth==0.2.5            # via pytest
-wrapt==1.11.2             # via astroid
+atomicwrites==1.4.0
+    # via pytest
+attrs==19.3.0
+    # via pytest
+coverage==5.2.1
+    # via
+    #   -r test-requirements.in
+    #   pytest-cov
+freezegun==0.3.15
+    # via
+    #   -r test-requirements.in
+    #   pytest-freezegun
+more-itertools==8.4.0 ; python_version > "3"
+    # via
+    #   -r test-requirements.in
+    #   pytest
+packaging==20.4
+    # via pytest
+pluggy==0.13.1
+    # via pytest
+py==1.10.0
+    # via pytest
+pyparsing==2.4.7
+    # via packaging
+pytest-cov==2.10.0
+    # via -r test-requirements.in
+pytest-freezegun==0.4.2
+    # via -r test-requirements.in
+pytest-mock==2.0.0
+    # via -r test-requirements.in
+pytest==4.6.11
+    # via
+    #   -r test-requirements.in
+    #   pytest-cov
+    #   pytest-freezegun
+    #   pytest-mock
+python-dateutil==2.8.1
+    # via freezegun
+six==1.15.0
+    # via
+    #   freezegun
+    #   packaging
+    #   pytest
+    #   python-dateutil
+wcwidth==0.2.5
+    # via pytest
