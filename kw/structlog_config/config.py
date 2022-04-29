@@ -41,17 +41,21 @@ DEBUG_PROCESSORS = [
 def get_structlog_processors(debug=False, json_kwargs=None, timestamp_format=None, extra_processors=None):
     """Helper method to get debug/production processors list."""
     json_kwargs = {} if json_kwargs is None else json_kwargs
+    extra_processors = extra_processors or []
 
     if debug:
-        processors = DEBUG_PROCESSORS
+        processors = DEBUG_PROCESSORS + extra_processors
     else:
-        processors = PRODUCTION_PROCESSORS + [
-            structlog.processors.TimeStamper(fmt=timestamp_format),
-            structlog.processors.JSONRenderer(serializer=simplejson.dumps, **json_kwargs),
-        ]
-
-    if extra_processors:
-        processors += extra_processors
+        processors = (
+            PRODUCTION_PROCESSORS
+            + [
+                structlog.processors.TimeStamper(fmt=timestamp_format),
+            ]
+            + extra_processors
+            + [
+                structlog.processors.JSONRenderer(serializer=simplejson.dumps, **json_kwargs),
+            ]
+        )
 
     return processors
 
