@@ -34,7 +34,6 @@ DEBUG_PROCESSORS = [
     datadog_tracer_injection,
     structlog.processors.ExceptionPrettyPrinter(),
     structlog.processors.UnicodeDecoder(),
-    structlog.dev.ConsoleRenderer(pad_event=25),
 ]
 
 
@@ -43,19 +42,19 @@ def get_structlog_processors(
 ):
     """Helper method to get debug/production processors list."""
     json_kwargs = {} if json_kwargs is None else json_kwargs
+    extra_processors = extra_processors or []
 
     if debug:
-        processors = DEBUG_PROCESSORS
+        processors = DEBUG_PROCESSORS + extra_processors + [
+            structlog.dev.ConsoleRenderer(pad_event=25),
+        ]
     else:
-        processors = PRODUCTION_PROCESSORS + [
+        processors = PRODUCTION_PROCESSORS + extra_processors + [
             structlog.processors.TimeStamper(fmt=timestamp_format),
             structlog.processors.JSONRenderer(
                 serializer=simplejson.dumps, **json_kwargs
             ),
         ]
-
-    if extra_processors:
-        processors += extra_processors
 
     return processors
 
