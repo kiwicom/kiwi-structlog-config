@@ -3,22 +3,10 @@ stages:
   - release
 
 include:
+  - 'https://ci-files.skypicker.com/templates/build/pre_commit.yml'
+  - 'https://ci-files.skypicker.com/templates/build/tox_init.yml'
+  - 'https://ci-files.skypicker.com/templates/test/tox_tests.yml'
   - 'https://ci-files.skypicker.com/templates/release/pypi_upload.yml'
-
-static-analysis:
-  stage: test
-  image: coala/base:0.11
-  script:
-   - coala --non-interactive
-
-tests:
-  stage: test
-  image: themattrix/tox
-  script:
-   - tox
-  cache:
-    paths:
-     - .tox/
 
 pypi_upload:
   only:
@@ -27,7 +15,7 @@ pypi_upload:
 
 pages:
   stage: release
-  image: python:3.5-alpine
+  image: python:3.10-alpine
   script:
    - apk add --no-cache make
    - pip install -r requirements.txt -r test-requirements.txt -r docs-requirements.txt -e .

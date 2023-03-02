@@ -10,8 +10,8 @@ setup(
     name='kiwi-structlog-config',
     version='0.2.0',
     url='https://github.com/kiwicom/kiwi-structlog-config',
-    author='Platform Team',
-    author_email='platform@kiwi.com',
+    author='Booking Backend team',
+    author_email='bookingbe@kiwi.com',
     packages=find_packages(),
     install_requires=REQUIREMENTS,
     tests_require=TEST_REQUIREMENTS,
@@ -20,7 +20,6 @@ setup(
         'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
 )

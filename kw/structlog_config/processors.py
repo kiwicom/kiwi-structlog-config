@@ -80,7 +80,7 @@ class Anonymize:
     @classmethod
     def build_mapping(cls, patterns):
         """Flatten input in a dict and compile regex patterns."""
-        mapping = dict()
+        mapping = {}
         for keys, pattern, replacement in patterns:
             regex = re.compile(pattern)
             mapping.update({key: (regex, replacement) for key in keys})
