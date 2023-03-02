@@ -38,9 +38,7 @@ DEBUG_PROCESSORS = [
 ]
 
 
-def get_structlog_processors(
-    debug=False, json_kwargs=None, timestamp_format=None, extra_processors=None
-):
+def get_structlog_processors(debug=False, json_kwargs=None, timestamp_format=None, extra_processors=None):
     """Helper method to get debug/production processors list."""
     json_kwargs = {} if json_kwargs is None else json_kwargs
 
@@ -49,9 +47,7 @@ def get_structlog_processors(
     else:
         processors = PRODUCTION_PROCESSORS + [
             structlog.processors.TimeStamper(fmt=timestamp_format),
-            structlog.processors.JSONRenderer(
-                serializer=simplejson.dumps, **json_kwargs
-            ),
+            structlog.processors.JSONRenderer(serializer=simplejson.dumps, **json_kwargs),
         ]
 
     if extra_processors:
@@ -60,13 +56,9 @@ def get_structlog_processors(
     return processors
 
 
-def configure_structlog(
-    debug=False, json_kwargs=None, timestamp_format=None, extra_processors=None
-):
+def configure_structlog(debug=False, json_kwargs=None, timestamp_format=None, extra_processors=None):
     """Configure proper log processors and settings for structlog with regards to debug setting."""
-    processors = get_structlog_processors(
-        debug, json_kwargs, timestamp_format, extra_processors
-    )
+    processors = get_structlog_processors(debug, json_kwargs, timestamp_format, extra_processors)
     structlog.configure_once(
         processors=processors,
         logger_factory=structlog.PrintLoggerFactory(),
@@ -75,9 +67,7 @@ def configure_structlog(
     )
 
 
-def configure_stdlib_logging(
-    debug=False, json_kwargs=None, timestamp_format=None, level=None
-):
+def configure_stdlib_logging(debug=False, json_kwargs=None, timestamp_format=None, level=None):
     """Configure standard logging to log using the same processors as structlog."""
 
     # Specific processors for stdlib logging
