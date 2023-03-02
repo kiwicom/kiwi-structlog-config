@@ -6,24 +6,38 @@
 #
 attrs==22.2.0
     # via pytest
+cfgv==3.3.1
+    # via pre-commit
 coverage[toml]==7.2.1
     # via
     #   -r test-requirements.in
     #   pytest-cov
+distlib==0.3.6
+    # via virtualenv
 exceptiongroup==1.1.0
     # via pytest
+filelock==3.9.0
+    # via virtualenv
 freezegun==1.2.2
     # via
     #   -r test-requirements.in
     #   pytest-freezegun
+identify==2.5.18
+    # via pre-commit
 iniconfig==2.0.0
     # via pytest
 more-itertools==9.1.0
     # via -r test-requirements.in
+nodeenv==1.7.0
+    # via pre-commit
 packaging==23.0
     # via pytest
+platformdirs==3.0.0
+    # via virtualenv
 pluggy==1.0.0
     # via pytest
+pre-commit==3.1.1
+    # via -r test-requirements.in
 pytest==7.2.1
     # via
     #   -r test-requirements.in
@@ -38,9 +52,16 @@ pytest-mock==3.10.0
     # via -r test-requirements.in
 python-dateutil==2.8.2
     # via freezegun
+pyyaml==6.0
+    # via pre-commit
 six==1.16.0
     # via python-dateutil
 tomli==2.0.1
     # via
     #   coverage
     #   pytest
+virtualenv==20.20.0
+    # via pre-commit
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools

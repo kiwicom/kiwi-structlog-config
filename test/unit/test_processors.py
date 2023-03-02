@@ -6,7 +6,11 @@ from kw.structlog_config import processors as uut
 
 
 @pytest.mark.parametrize(
-    "value, expected", ((1.1119, "1.112"), (Decimal("1.1119"), "1.112"),)
+    "value, expected",
+    (
+        (1.1119, "1.112"),
+        (Decimal("1.1119"), "1.112"),
+    ),
 )
 def test_numeric_rounder(value, expected):
     event_dict = {"value": value}

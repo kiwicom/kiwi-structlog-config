@@ -117,7 +117,11 @@ def configure_stdlib_logging(
                 },
             },
             "loggers": {
-                "": {"handlers": ["default"], "level": level, "propagate": True,},
+                "": {
+                    "handlers": ["default"],
+                    "level": level,
+                    "propagate": True,
+                },
             },
         }
     )
