@@ -9,10 +9,31 @@ include:
   - 'https://ci-files.skypicker.com/templates/test/tox_tests.yml'
   - 'https://ci-files.skypicker.com/templates/release/pypi_upload.yml'
 
+variables:
+  PYPI_CONFIG: |
+    [distutils]
+    index-servers = kiwi
+
+    [kiwi]
+    repository: https://pypi.skypicker.com/pypi/
+    username: $PYPI_USERNAME
+    password: $PYPI_PASSWORD
+
 pypi_upload:
-  only:
-    changes:
-      - setup.py
+  when: manual
+
+release_unstable:
+  stage: release
+  image: python:3.10-alpine
+  variables:
+    VERSION_FILE: VERSION
+  script:
+   - echo "`cat $VERSION_FILE`.dev$(date +'%s')" > $VERSION_FILE
+   - echo "$PYPI_CONFIG" > ~/.pypirc
+   - pip install wheel
+   - python setup.py bdist_wheel --universal upload -r kiwi
+  when: manual
+
 
 pages:
   stage: release

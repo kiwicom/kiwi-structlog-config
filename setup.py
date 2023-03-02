@@ -1,3 +1,4 @@
+from pathlib import Path
 from setuptools import find_packages, setup
 
 with open("requirements.in") as f:
@@ -6,9 +7,11 @@ with open("requirements.in") as f:
 with open("test-requirements.in") as f:
     TEST_REQUIREMENTS = [line for line in f if line and line[0] not in "#-"]
 
+version = Path("VERSION").read_text(encoding="utf-8").strip()
+
 setup(
     name="kiwi-structlog-config",
-    version="0.2.0",
+    version=version,
     url="https://github.com/kiwicom/kiwi-structlog-config",
     author="Booking Backend team",
     author_email="bookingbe@kiwi.com",
