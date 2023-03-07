@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.3.2 (2023-03-07)
+
+- ddtrace: use ddtrace.Tracer.get_log_correlation_context()
+  instead of deprecated ddtrace.helpers.get_correlation_ids.
+  ddtrace above version v0.53.0 required for this to work.
+
 ## 0.3.1 (2023-03-07)
 
 - Move JSONRenderer to be last processor in the list:
