@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.3.1 (2023-03-07)
+
+- Move JSONRenderer to be last processor in the list:
+
+  > JSONRenderer processors flattens event_dict to string
+  > and it cannot be used by following processors.
+  > Let's move extra_processors before
+  > JSONRenderer processor to have original dict available.
+
 ## 0.3.0 (2023-03-01)
 
 - Take ownership from platfrom team to booking backend team
