@@ -61,7 +61,7 @@ def get_structlog_processors(debug=False, json_kwargs=None, timestamp_format=Non
 
 
 def configure_structlog(debug=False, json_kwargs=None, timestamp_format=None, extra_processors=None):
-    """Configure proper log processors and settings for structlog with regards to debug setting."""
+    """Configure proper log processors and settings for structlog in regard to debug setting."""
     processors = get_structlog_processors(debug, json_kwargs, timestamp_format, extra_processors)
     structlog.configure_once(
         processors=processors,
