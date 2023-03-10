@@ -17,7 +17,7 @@
 
 ## 0.3.0 (2023-03-01)
 
-- Take ownership from platfrom team to booking backend team
+- Take ownership from platform team to booking backend team
 - Remove support for Python versions 2.7, 3.6, 3.7 and 3.8
 - Add support for Python versions 3.9, 3.10 and 3.11
 - Upgrade Python requirements

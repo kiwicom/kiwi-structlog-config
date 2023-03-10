@@ -8,6 +8,7 @@ include:
   - 'https://ci-files.skypicker.com/templates/build/tox_init.yml'
   - 'https://ci-files.skypicker.com/templates/test/tox_tests.yml'
   - 'https://ci-files.skypicker.com/templates/release/pypi_upload.yml'
+  - 'https://ci-files.skypicker.com/release/twine.src.v1.yml'
 
 variables:
   PYPI_CONFIG: |
@@ -21,6 +22,13 @@ variables:
 
 pypi_upload:
   when: manual
+
+release-public:
+  extends: .twine-upload
+  variables:
+    TWINE_REGISTRY: https://pypi.org/
+    REGISTRY_USERNAME: $PYPIORG_USERNAME
+    REGISTRY_PASSWORD: $PYPIORG_PASSWORD
 
 release_unstable:
   stage: release
