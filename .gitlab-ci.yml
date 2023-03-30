@@ -10,36 +10,43 @@ include:
   - 'https://ci-files.skypicker.com/templates/release/pypi_upload.yml'
   - 'https://ci-files.skypicker.com/release/twine.src.v1.yml'
 
-variables:
-  PYPI_CONFIG: |
-    [distutils]
-    index-servers = kiwi
-
-    [kiwi]
-    repository: https://pypi.skypicker.com/pypi/
-    username: $PYPI_USERNAME
-    password: $PYPI_PASSWORD
-
-pypi_upload:
-  when: manual
-
-release-public:
+twine-upload:
   extends: .twine-upload
   variables:
     TWINE_REGISTRY: https://pypi.org/
     REGISTRY_USERNAME: $PYPIORG_USERNAME
     REGISTRY_PASSWORD: $PYPIORG_PASSWORD
 
-release_unstable:
+
+pypi_upload:
+  when: manual
+  variables:
+    PYPI_CONFIG: |
+      [distutils]
+      index-servers = kiwi
+      [kiwi]
+      repository: https://pypi.skypicker.com/pypi/
+      username: $PYPI_USERNAME
+      password: $PYPI_PASSWORD
+
+
+release-skypicker-unstable:
   stage: release
   image: python:3.10-alpine
   variables:
     VERSION_FILE: VERSION
+    PYPI_CONFIG: |
+      [distutils]
+      index-servers = kiwi
+      [kiwi]
+      repository: https://pypi.skypicker.com/pypi/
+      username: $PYPI_USERNAME
+      password: $PYPI_PASSWORD
   script:
-   - echo "`cat $VERSION_FILE`.dev$(date +'%s')" > $VERSION_FILE
-   - echo "$PYPI_CONFIG" > ~/.pypirc
-   - pip install wheel
-   - python setup.py bdist_wheel --universal upload -r kiwi
+    - echo "`cat $VERSION_FILE`.dev$(date +'%s')" > $VERSION_FILE
+    - echo "$PYPI_CONFIG" > ~/.pypirc
+    - pip install wheel
+    - python setup.py bdist_wheel --universal upload -r kiwi
   when: manual
 
 
