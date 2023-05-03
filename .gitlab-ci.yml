@@ -8,27 +8,71 @@ include:
   - 'https://ci-files.skypicker.com/templates/build/tox_init.yml'
   - 'https://ci-files.skypicker.com/templates/test/tox_tests.yml'
   - 'https://ci-files.skypicker.com/templates/release/pypi_upload.yml'
-  - 'https://ci-files.skypicker.com/release/twine.src.v1.yml'
+#  - 'https://ci-files.skypicker.com/release/twine.src.v1.yml'
 
-variables:
-  PYPI_CONFIG: |
-    [distutils]
-    index-servers = kiwi
+.twine-upload:
+  stage: release
+  image: $CI_REGISTRY/platform/k8s-deploy-runner
+  tags: [ low-performance ]
+  dependencies: [ ]
+  variables:
+    PYPI_REGISTRY: pungi.skypicker.com
+    TWINE_REGISTRY: https://upload.pypi.org/legacy/
+    REGISTRY_USERNAME: $PYPI_USERNAME
+    REGISTRY_PASSWORD: $PYPI_PASSWORD
+    PIP_EXTRA_INDEX_URL: https://${PYPI_REGISTRY}/simple
+    PYPI_CONFIG: |
+      [distutils]
+      index-servers = registry
 
-    [kiwi]
-    repository: https://pypi.skypicker.com/pypi/
-    username: $PYPI_USERNAME
-    password: $PYPI_PASSWORD
+      [registry]
+      repository: https://${PYPI_REGISTRY}
+      username: ${REGISTRY_USERNAME}
+      password: ${REGISTRY_PASSWORD}
+    NETRC_CONFIG: |
+      machine ${PYPI_REGISTRY}
+          login ${REGISTRY_USERNAME}
+          password ${REGISTRY_PASSWORD}
+    CRANE_RELEASE_TARGET: pypi
+  script:
+    - echo "$PYPI_CONFIG" > ~/.pypirc
+    - echo "$NETRC_CONFIG" > ~/.netrc
+    - pip install --upgrade pip
+    - apk add --no-cache gcc python3-dev musl-dev libffi-dev
+    - pip install twine
+    - python setup.py sdist bdist_wheel
+    - export release_error=0
+    - deployment_id=$(ddannouncer.py idgen | tail -n 1) || true
+    - ddannouncer.py --id=$deployment_id start || true
+    - twine upload
+      --verbose
+      --username ${PYPIORG_USERNAME}
+      --password ${PYPIORG_PASSWORD}
+      --repository-url ${TWINE_REGISTRY}
+      dist/* || export release_error=1
+    - ddannouncer.py finish --id=$deployment_id --status=$release_error
+    - exit $release_error
 
 pypi_upload:
   when: manual
+  variables:
+    PYPI_CONFIG: |
+      [distutils]
+      index-servers = kiwi
+
+      [kiwi]
+      repository: https://pypi.skypicker.com/pypi/
+      username: $PYPI_USERNAME
+      password: $PYPI_PASSWORD
 
 release-public:
   extends: .twine-upload
-  variables:
-    TWINE_REGISTRY: https://pypi.org/
-    REGISTRY_USERNAME: $PYPIORG_USERNAME
-    REGISTRY_PASSWORD: $PYPIORG_PASSWORD
+#  variables:
+#    TWINE_REGISTRY: https://upload.pypi.org/legacy/
+#    REGISTRY_USERNAME: $PYPIORG_USERNAME
+#    REGISTRY_PASSWORD: $PYPIORG_PASSWORD
+  rules:
+    - when: manual
 
 release_unstable:
   stage: release
