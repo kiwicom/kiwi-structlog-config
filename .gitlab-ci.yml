@@ -47,8 +47,8 @@ include:
     - twine upload
       --verbose
       --username ${PYPIORG_USERNAME}
-      --password ${PYPIORG_PASSWORD}
-      --repository-url ${TWINE_REGISTRY}
+      --password "${PYPIORG_PASSWORD}"
+      --repository-url "${TWINE_REGISTRY}"
       dist/* || export release_error=1
     - ddannouncer.py finish --id=$deployment_id --status=$release_error
     - exit $release_error
