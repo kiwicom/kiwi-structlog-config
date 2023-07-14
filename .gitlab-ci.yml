@@ -35,8 +35,8 @@ include:
           password ${REGISTRY_PASSWORD}
     CRANE_RELEASE_TARGET: pypi
   script:
-    # - echo "$PYPI_CONFIG" > ~/.pypirc
-    # - echo "$NETRC_CONFIG" > ~/.netrc
+    - echo "$PYPI_CONFIG" > ~/.pypirc
+    - echo "$NETRC_CONFIG" > ~/.netrc
     - pip install --upgrade pip
     - apk add --no-cache gcc python3-dev musl-dev libffi-dev
     - pip install twine
@@ -45,12 +45,7 @@ include:
     - deployment_id=$(ddannouncer.py idgen | tail -n 1) || true
     - ddannouncer.py --id=$deployment_id start || true
     - echo -e PYPIORG_USERNAME
-    - twine upload
-      --verbose
-      --username ${PYPIORG_USERNAME}
-      --password "${PYPIORG_PASSWORD}"
-      --repository-url "https://upload.pypi.org/legacy/"
-      dist/* || export release_error=1
+    - twine upload --verbose --username ${PYPIORG_USERNAME} --password "${PYPIORG_PASSWORD}" --repository-url "https://upload.pypi.org/legacy/" dist/* || export release_error=1
     - ddannouncer.py finish --id=$deployment_id --status=$release_error
     - exit $release_error
 
