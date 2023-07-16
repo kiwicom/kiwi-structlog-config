@@ -26,7 +26,7 @@ pypi_upload:
 release-public:
   extends: .twine-upload
   variables:
-    TWINE_REGISTRY: https://pypi.org/
+    TWINE_REGISTRY: https://upload.pypi.org/legacy/
     REGISTRY_USERNAME: $PYPIORG_USERNAME
     REGISTRY_PASSWORD: $PYPIORG_PASSWORD
 
