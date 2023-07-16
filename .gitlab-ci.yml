@@ -29,6 +29,9 @@ release-public:
     TWINE_REGISTRY: https://upload.pypi.org/legacy/
     REGISTRY_USERNAME: $PYPIORG_USERNAME
     REGISTRY_PASSWORD: $PYPIORG_PASSWORD
+  rules:
+    - when: manual
+
 
 release_unstable:
   stage: release
