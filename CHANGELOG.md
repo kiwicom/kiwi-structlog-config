@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.3 (2024-01-24)
+
+- Add support for structlog==24.1.0
+
 ## 0.3.2 (2023-03-07)
 
 - ddtrace: use ddtrace.Tracer.get_log_correlation_context()
