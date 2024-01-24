@@ -43,7 +43,10 @@ def process_stdlib_logging(_, __, event_dict):
 
 def add_structlog_context(_, __, event_dict):
     """Update ``event_dict`` with context of the ``structlog`` logger."""
-    event_dict.update(structlog.get_logger()._context._dict)
+    if isinstance(structlog.get_logger()._context, dict):
+        event_dict.update(structlog.get_logger()._context)
+    else:
+        event_dict.update(structlog.get_logger()._context._dict)
     return event_dict
 
 
