@@ -4,11 +4,17 @@ stages:
   - release
 
 include:
-  - 'https://ci-files.skypicker.com/templates/build/pre_commit.yml'
+  - 'https://ci-files.skypicker.com/analysis/precommit.v3.yml'
   - 'https://ci-files.skypicker.com/templates/build/tox_init.yml'
   - 'https://ci-files.skypicker.com/templates/test/tox_tests.yml'
   - 'https://ci-files.skypicker.com/templates/release/pypi_upload.yml'
   - 'https://ci-files.skypicker.com/release/twine.src.v1.yml'
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_COMMIT_TAG
+    - if: $CI_MERGE_REQUEST_ID
 
 variables:
   PYPI_CONFIG: |
@@ -30,7 +36,8 @@ release-public:
     REGISTRY_USERNAME: $PYPIORG_USERNAME
     REGISTRY_PASSWORD: $PYPIORG_PASSWORD
   rules:
-    - when: manual
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual
 
 
 release_unstable:
@@ -43,7 +50,9 @@ release_unstable:
    - echo "$PYPI_CONFIG" > ~/.pypirc
    - pip install wheel
    - python setup.py bdist_wheel --universal upload -r kiwi
-  when: manual
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+      when: manual
 
 
 pages:
@@ -57,5 +66,5 @@ pages:
   artifacts:
     paths:
      - public
-  only:
-   - master
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master"'
