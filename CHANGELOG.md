@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.4 (2024-09-27)
+
+- Remove `__init__.py` from kw folder
+
 ## 0.3.3 (2024-01-24)
 
 - Add support for structlog==24.1.0

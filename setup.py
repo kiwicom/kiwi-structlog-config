@@ -1,5 +1,5 @@
 from pathlib import Path
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, setup
 
 with open("requirements.in") as f:
     REQUIREMENTS = [line for line in f if line and line[0] not in "#-"]
@@ -15,7 +15,7 @@ setup(
     url="https://github.com/kiwicom/kiwi-structlog-config",
     author="Booking Backend team",
     author_email="bookingbe@kiwi.com",
-    packages=find_packages(),
+    packages=find_namespace_packages(),
     install_requires=REQUIREMENTS,
     tests_require=TEST_REQUIREMENTS,
     include_package_data=True,
