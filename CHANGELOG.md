@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.5 (2025-07-18)
+
+- add support for ddtrace==3.10
+
 ## 0.3.4 (2024-09-27)
 
 - Remove `__init__.py` from kw folder
