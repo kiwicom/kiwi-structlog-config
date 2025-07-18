@@ -55,13 +55,25 @@ def datadog_tracer_injection(_, __, event_dict):
     if not ddtrace:
         return event_dict
 
-    context = ddtrace.tracer.get_log_correlation_context()
+    try:
+        context = ddtrace.tracer.get_log_correlation_context()
 
-    event_dict["dd.trace_id"] = context["trace_id"]
-    event_dict["dd.span_id"] = context["span_id"]
-    event_dict["dd.env"] = context["env"]
-    event_dict["dd.service"] = context["service"]
-    event_dict["dd.version"] = context["version"]
+        # Safely get values with defaults
+        if trace_id := context.get("trace_id"):
+            event_dict["dd.trace_id"] = trace_id
+        if span_id := context.get("span_id"):
+            event_dict["dd.span_id"] = span_id
+        if env := context.get("env"):
+            event_dict["dd.env"] = env
+        if service := context.get("service"):
+            event_dict["dd.service"] = service
+        if version := context.get("version"):
+            event_dict["dd.version"] = version
+
+    except Exception:
+        # If anything goes wrong, just return the original event_dict
+        # This prevents the logging system from breaking
+        pass
 
     return event_dict
 
