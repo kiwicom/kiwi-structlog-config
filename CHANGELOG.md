@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.6 (2025-11-12)
+
+- replace threadlocal with contextvars (threadlocal is deprecated)
+
 ## 0.3.5 (2025-07-18)
 
 - add support for ddtrace==3.10
