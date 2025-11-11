@@ -17,6 +17,7 @@ from .processors import (
 
 # structlog configuration
 PRODUCTION_PROCESSORS = [
+    structlog.contextvars.merge_contextvars,
     structlog.stdlib.add_log_level,
     drop_debug_logs,
     structlog.stdlib.PositionalArgumentsFormatter(),
@@ -27,6 +28,7 @@ PRODUCTION_PROCESSORS = [
 ]
 
 DEBUG_PROCESSORS = [
+    structlog.contextvars.merge_contextvars,
     structlog.stdlib.add_log_level,
     structlog.stdlib.PositionalArgumentsFormatter(),
     numeric_rounder,
@@ -67,7 +69,6 @@ def configure_structlog(debug=False, json_kwargs=None, timestamp_format=None, ex
         processors=processors,
         logger_factory=structlog.PrintLoggerFactory(),
         wrapper_class=structlog.stdlib.BoundLogger,
-        context_class=structlog.threadlocal.wrap_dict(dict),
     )
 
 
