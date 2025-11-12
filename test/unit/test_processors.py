@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+import freezegun
 import pytest
 
 from kw.structlog_config import processors as uut
@@ -18,7 +19,7 @@ def test_numeric_rounder(value, expected):
     assert str(result["value"]) == expected
 
 
-@pytest.mark.freeze_time("2018-01-01")
+@freezegun.freeze_time("2018-01-01")
 def test_unix_timestamper():
     result = uut.unix_timestamper(None, None, {})
     assert str(result["timestamp"]) == "1514764800.0"
