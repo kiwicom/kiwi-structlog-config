@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.3.7 (2026-09-10)
+
+- fix datadog_tracer_injection to read dd.trace_id/dd.span_id keys from ddtrace
+- cache active trace ids in structlog contextvars and restore them once the span closes
+
 ## 0.3.6 (2025-11-12)
 
 - replace threadlocal with contextvars (threadlocal is deprecated)

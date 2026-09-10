@@ -57,17 +57,31 @@ def datadog_tracer_injection(_, __, event_dict):
 
     try:
         context = ddtrace.tracer.get_log_correlation_context()
+        trace_id = context.get("dd.trace_id") or context.get("trace_id")
+        span_id = context.get("dd.span_id") or context.get("span_id")
+        env = context.get("dd.env") or context.get("env")
+        service = context.get("dd.service") or context.get("service")
+        version = context.get("dd.version") or context.get("version")
 
-        # Safely get values with defaults
-        if trace_id := context.get("trace_id"):
+        if trace_id and trace_id != "0":
             event_dict["dd.trace_id"] = trace_id
-        if span_id := context.get("span_id"):
-            event_dict["dd.span_id"] = span_id
-        if env := context.get("env"):
+            bind_kwargs = {"dd.trace_id": trace_id}
+            if span_id and span_id != "0":
+                event_dict["dd.span_id"] = span_id
+                bind_kwargs["dd.span_id"] = span_id
+            structlog.contextvars.bind_contextvars(**bind_kwargs)
+        else:
+            bound_context = structlog.contextvars.get_contextvars()
+            if (bound_trace_id := bound_context.get("dd.trace_id")) and bound_trace_id != "0":
+                event_dict["dd.trace_id"] = bound_trace_id
+            if (bound_span_id := bound_context.get("dd.span_id")) and bound_span_id != "0":
+                event_dict["dd.span_id"] = bound_span_id
+
+        if env:
             event_dict["dd.env"] = env
-        if service := context.get("service"):
+        if service:
             event_dict["dd.service"] = service
-        if version := context.get("version"):
+        if version:
             event_dict["dd.version"] = version
 
     except Exception:
