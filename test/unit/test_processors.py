@@ -1,4 +1,5 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 import freezegun
 import pytest
@@ -41,3 +42,73 @@ def test_anonymize(key, value, expected):
 
     result = anonymize(None, None, {key: value})
     assert result[key] == expected
+
+
+@pytest.fixture
+def fake_ddtrace_context():
+    """Patch ddtrace.tracer.get_log_correlation_context in the processors module."""
+    with patch.object(uut.ddtrace, "tracer") as mock_tracer:
+        yield mock_tracer
+
+
+def test_datadog_tracer_injection_with_active_span_ddtrace_3_10(fake_ddtrace_context):
+    """ddtrace >= 3.10 returns keys with 'dd.' prefix."""
+    fake_ddtrace_context.get_log_correlation_context.return_value = {
+        "dd.trace_id": "123456789",
+        "dd.span_id": "987654321",
+        "dd.env": "production",
+        "dd.service": "mambo",
+        "dd.version": "abc123",
+    }
+    result = uut.datadog_tracer_injection(None, None, {})
+    assert result["dd.trace_id"] == "123456789"
+    assert result["dd.span_id"] == "987654321"
+    assert result["dd.env"] == "production"
+    assert result["dd.service"] == "mambo"
+    assert result["dd.version"] == "abc123"
+
+
+def test_datadog_tracer_injection_with_active_span_ddtrace_old(fake_ddtrace_context):
+    """ddtrace < 3.10 returns keys without 'dd.' prefix."""
+    fake_ddtrace_context.get_log_correlation_context.return_value = {
+        "trace_id": "123456789",
+        "span_id": "987654321",
+        "env": "production",
+        "service": "mambo",
+        "version": "abc123",
+    }
+    result = uut.datadog_tracer_injection(None, None, {})
+    assert result["dd.trace_id"] == "123456789"
+    assert result["dd.span_id"] == "987654321"
+    assert result["dd.env"] == "production"
+    assert result["dd.service"] == "mambo"
+    assert result["dd.version"] == "abc123"
+
+
+def test_datadog_tracer_injection_no_span_does_not_overwrite(fake_ddtrace_context):
+    """When no span is active, '0' values must not overwrite existing event_dict values."""
+    fake_ddtrace_context.get_log_correlation_context.return_value = {
+        "dd.trace_id": "0",
+        "dd.span_id": "0",
+        "dd.env": "",
+        "dd.service": "",
+        "dd.version": "",
+    }
+    event_dict = {"dd.trace_id": "real_trace", "dd.span_id": "real_span"}
+    result = uut.datadog_tracer_injection(None, None, event_dict)
+    assert result["dd.trace_id"] == "real_trace"
+    assert result["dd.span_id"] == "real_span"
+
+
+def test_datadog_tracer_injection_no_span_no_existing_values(fake_ddtrace_context):
+    """When no span and no existing values, nothing is injected."""
+    fake_ddtrace_context.get_log_correlation_context.return_value = {
+        "dd.trace_id": "0",
+        "dd.span_id": "0",
+        "dd.env": "",
+        "dd.service": "",
+        "dd.version": "",
+    }
+    result = uut.datadog_tracer_injection(None, None, {})
+    assert "dd.trace_id" not in result
+    assert "dd.span_id" not in result

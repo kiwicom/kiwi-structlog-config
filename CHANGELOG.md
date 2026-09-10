@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.3.7 (2026-09-10)
+
+- fix `datadog_tracer_injection` processor: support ddtrace >= 3.10 key format
+  (`dd.trace_id`/`dd.span_id` with prefix) and skip `"0"` values when no span
+  is active so contextvars-bound values are not overwritten
+
 ## 0.3.6 (2025-11-12)
 
 - replace threadlocal with contextvars (threadlocal is deprecated)

@@ -51,24 +51,42 @@ def add_structlog_context(_, __, event_dict):
 
 
 def datadog_tracer_injection(_, __, event_dict):
-    """Propagate trace ids for Datadog."""
+    """Propagate trace ids for Datadog.
+
+    Handles both ddtrace < 3.10 (keys without ``dd.`` prefix) and
+    ddtrace >= 3.10 (keys with ``dd.`` prefix).  When no span is active,
+    ``get_log_correlation_context()`` returns the string ``"0"`` for
+    trace_id/span_id — which is truthy — so we explicitly skip those to
+    avoid overwriting values already present in ``event_dict`` (e.g. bound
+    via structlog contextvars while the span was still active).
+    """
     if not ddtrace:
         return event_dict
 
     try:
         context = ddtrace.tracer.get_log_correlation_context()
 
-        # Safely get values with defaults
-        if trace_id := context.get("trace_id"):
-            event_dict["dd.trace_id"] = trace_id
-        if span_id := context.get("span_id"):
-            event_dict["dd.span_id"] = span_id
-        if env := context.get("env"):
-            event_dict["dd.env"] = env
-        if service := context.get("service"):
-            event_dict["dd.service"] = service
-        if version := context.get("version"):
-            event_dict["dd.version"] = version
+        # ddtrace >= 3.10 uses "dd."-prefixed keys; older versions use bare keys.
+        # Support both by checking each key with and without the prefix.
+        mapping = {
+            "dd.trace_id": "dd.trace_id",
+            "trace_id": "dd.trace_id",
+            "dd.span_id": "dd.span_id",
+            "span_id": "dd.span_id",
+            "dd.env": "dd.env",
+            "env": "dd.env",
+            "dd.service": "dd.service",
+            "service": "dd.service",
+            "dd.version": "dd.version",
+            "version": "dd.version",
+        }
+
+        for source_key, dest_key in mapping.items():
+            value = context.get(source_key)
+            # Skip "0" (no active span) and empty strings so we don't
+            # overwrite values already in event_dict from contextvars.
+            if value and value != "0":
+                event_dict[dest_key] = value
 
     except Exception:
         # If anything goes wrong, just return the original event_dict
