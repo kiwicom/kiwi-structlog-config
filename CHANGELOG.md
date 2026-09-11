@@ -5,6 +5,9 @@
 - fix `datadog_tracer_injection` processor: support ddtrace >= 3.10 key format
   (`dd.trace_id`/`dd.span_id` with prefix) and skip `"0"` values when no span
   is active so contextvars-bound values are not overwritten
+- cache active trace ids in `structlog.contextvars` and restore them once the
+  span closes, so log lines emitted after span close (e.g. WSGI response logs)
+  stay correlated with their trace
 
 ## 0.3.6 (2025-11-12)
 
