@@ -1,5 +1,5 @@
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import freezegun
 import pytest
@@ -46,9 +46,10 @@ def test_anonymize(key, value, expected):
 
 @pytest.fixture
 def fake_ddtrace_context():
-    """Patch ddtrace.tracer.get_log_correlation_context in the processors module."""
-    with patch.object(uut.ddtrace, "tracer") as mock_tracer:
-        yield mock_tracer
+    """Inject a fake ddtrace module so tests run without ddtrace installed."""
+    fake_ddtrace = MagicMock()
+    with patch.object(uut, "ddtrace", fake_ddtrace):
+        yield fake_ddtrace.tracer
 
 
 def test_datadog_tracer_injection_with_active_span_ddtrace_3_10(fake_ddtrace_context):
