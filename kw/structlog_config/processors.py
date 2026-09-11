@@ -12,6 +12,9 @@ try:
 except ImportError:
     ddtrace = None
 
+_PLACEHOLDER = "0"
+_TRACE_KEYS = ("dd.trace_id", "dd.span_id")
+
 
 def numeric_rounder(_, __, event_dict):
     """Round any floats in ``event_dict`` to 3 decimal places."""
@@ -53,12 +56,22 @@ def add_structlog_context(_, __, event_dict):
 def datadog_tracer_injection(_, __, event_dict):
     """Propagate trace ids for Datadog.
 
+    ddtrace ships its own structlog integration that prepends a
+    ``_tracer_injection`` processor at index 0.  That processor
+    unconditionally writes ``dd.trace_id``/``dd.span_id`` from
+    ``get_log_correlation_context()`` into the event dict — including
+    the placeholder string ``"0"`` when no span is active.  Because it
+    runs before us, simply *skipping* ``"0"`` is not enough: the zero is
+    already in the event dict and nothing else put the real value back.
+
+    To fix this, we **remember** real trace ids in
+    ``structlog.contextvars`` while the span is alive, and **restore**
+    them from contextvars when only placeholders are available (the span
+    has already closed, e.g. the WSGI response log emitted in the
+    outermost middleware's ``finally`` block).
+
     Handles both ddtrace < 3.10 (keys without ``dd.`` prefix) and
-    ddtrace >= 3.10 (keys with ``dd.`` prefix).  When no span is active,
-    ``get_log_correlation_context()`` returns the string ``"0"`` for
-    trace_id/span_id — which is truthy — so we explicitly skip those to
-    avoid overwriting values already present in ``event_dict`` (e.g. bound
-    via structlog contextvars while the span was still active).
+    ddtrace >= 3.10 (keys with ``dd.`` prefix).
     """
     if not ddtrace:
         return event_dict
@@ -81,12 +94,22 @@ def datadog_tracer_injection(_, __, event_dict):
             "version": "dd.version",
         }
 
+        remembered = {}
         for source_key, dest_key in mapping.items():
             value = context.get(source_key)
-            # Skip "0" (no active span) and empty strings so we don't
-            # overwrite values already in event_dict from contextvars.
-            if value and value != "0":
+            if value and value != _PLACEHOLDER:
                 event_dict[dest_key] = value
+                if dest_key in _TRACE_KEYS:
+                    remembered[dest_key] = value
+
+        if remembered:
+            structlog.contextvars.bind_contextvars(**remembered)
+        else:
+            bound = structlog.contextvars.get_contextvars()
+            for key in _TRACE_KEYS:
+                value = bound.get(key)
+                if value and value != _PLACEHOLDER:
+                    event_dict[key] = value
 
     except Exception:
         # If anything goes wrong, just return the original event_dict
