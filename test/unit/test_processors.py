@@ -3,8 +3,21 @@ from unittest.mock import MagicMock, patch
 
 import freezegun
 import pytest
+import structlog
 
 from kw.structlog_config import processors as uut
+
+
+@pytest.fixture(autouse=True)
+def clear_contextvars():
+    """Clear structlog contextvars before and after each test.
+
+    datadog_tracer_injection now mutates global contextvars state,
+    so tests must start from a clean slate and not leak into each other.
+    """
+    structlog.contextvars.clear_contextvars()
+    yield
+    structlog.contextvars.clear_contextvars()
 
 
 @pytest.mark.parametrize(
@@ -103,6 +116,71 @@ def test_datadog_tracer_injection_no_span_does_not_overwrite(fake_ddtrace_contex
 
 def test_datadog_tracer_injection_no_span_no_existing_values(fake_ddtrace_context):
     """When no span and no existing values, nothing is injected."""
+    fake_ddtrace_context.get_log_correlation_context.return_value = {
+        "dd.trace_id": "0",
+        "dd.span_id": "0",
+        "dd.env": "",
+        "dd.service": "",
+        "dd.version": "",
+    }
+    result = uut.datadog_tracer_injection(None, None, {})
+    assert "dd.trace_id" not in result
+    assert "dd.span_id" not in result
+
+
+def test_datadog_tracer_injection_caches_ids_in_contextvars(fake_ddtrace_context):
+    """With an active span, ids land in event dict and in structlog.contextvars."""
+    fake_ddtrace_context.get_log_correlation_context.return_value = {
+        "dd.trace_id": "111",
+        "dd.span_id": "222",
+        "dd.env": "production",
+        "dd.service": "mambo",
+        "dd.version": "abc123",
+    }
+    result = uut.datadog_tracer_injection(None, None, {})
+    assert result["dd.trace_id"] == "111"
+    assert result["dd.span_id"] == "222"
+    bound = structlog.contextvars.get_contextvars()
+    assert bound["dd.trace_id"] == "111"
+    assert bound["dd.span_id"] == "222"
+
+
+def test_datadog_tracer_injection_restores_ids_after_span_closes(fake_ddtrace_context):
+    """Two sequential calls — real ids then placeholders — second call still gets real ids."""
+    fake_ddtrace_context.get_log_correlation_context.return_value = {
+        "dd.trace_id": "111",
+        "dd.span_id": "222",
+        "dd.env": "production",
+        "dd.service": "mambo",
+        "dd.version": "abc123",
+    }
+    uut.datadog_tracer_injection(None, None, {})
+
+    fake_ddtrace_context.get_log_correlation_context.return_value = {
+        "dd.trace_id": "0",
+        "dd.span_id": "0",
+        "dd.env": "",
+        "dd.service": "",
+        "dd.version": "",
+    }
+    result = uut.datadog_tracer_injection(None, None, {})
+    assert result["dd.trace_id"] == "111"
+    assert result["dd.span_id"] == "222"
+
+
+def test_datadog_tracer_injection_no_leak_after_clear(fake_ddtrace_context):
+    """After clear_contextvars, a placeholder-only call yields no trace id."""
+    fake_ddtrace_context.get_log_correlation_context.return_value = {
+        "dd.trace_id": "111",
+        "dd.span_id": "222",
+        "dd.env": "production",
+        "dd.service": "mambo",
+        "dd.version": "abc123",
+    }
+    uut.datadog_tracer_injection(None, None, {})
+
+    structlog.contextvars.clear_contextvars()
+
     fake_ddtrace_context.get_log_correlation_context.return_value = {
         "dd.trace_id": "0",
         "dd.span_id": "0",
