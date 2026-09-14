@@ -60,15 +60,13 @@ def datadog_tracer_injection(_, __, event_dict):
     ``_tracer_injection`` processor at index 0.  That processor
     unconditionally writes ``dd.trace_id``/``dd.span_id`` from
     ``get_log_correlation_context()`` into the event dict — including
-    the placeholder string ``"0"`` when no span is active.  Because it
-    runs before us, simply *skipping* ``"0"`` is not enough: the zero is
-    already in the event dict and nothing else put the real value back.
+    the placeholder string ``"0"`` when no span is active.
 
-    To fix this, we **remember** real trace ids in
-    ``structlog.contextvars`` while the span is alive, and **restore**
-    them from contextvars when only placeholders are available (the span
-    has already closed, e.g. the WSGI response log emitted in the
-    outermost middleware's ``finally`` block).
+    To keep trace correlation working after the span closes (e.g. the
+    WSGI response log emitted in the outermost middleware's ``finally``
+    block), we **cache** real trace ids in ``structlog.contextvars``
+    while the span is alive and **restore** them from contextvars when
+    only placeholders are available.
 
     Handles both ddtrace < 3.10 (keys without ``dd.`` prefix) and
     ddtrace >= 3.10 (keys with ``dd.`` prefix).
@@ -94,16 +92,16 @@ def datadog_tracer_injection(_, __, event_dict):
             "version": "dd.version",
         }
 
-        remembered = {}
+        to_remember = {}
         for source_key, dest_key in mapping.items():
             value = context.get(source_key)
             if value and value != _PLACEHOLDER:
                 event_dict[dest_key] = value
                 if dest_key in _TRACE_KEYS:
-                    remembered[dest_key] = value
+                    to_remember[dest_key] = value
 
-        if remembered:
-            structlog.contextvars.bind_contextvars(**remembered)
+        if to_remember:
+            structlog.contextvars.bind_contextvars(**to_remember)
         else:
             bound = structlog.contextvars.get_contextvars()
             for key in _TRACE_KEYS:
